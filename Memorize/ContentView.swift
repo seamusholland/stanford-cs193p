@@ -8,56 +8,66 @@
 import SwiftUI
 
 struct ContentView: View {
-    let emojis = ["🦔", "🐂", "🐖","🐃", "🦡", "🐘", "🦒", "🐅", "🦓", "🐒", "🐆", "🦍"]
+    let themeMap = [
+        "animals": ["🦔", "🐂", "🐖","🐃", "🦡", "🐘", "🦒", "🐅", "🦓", "🐒", "🐆", "🦍"],
+        "plants": ["🌲", "🌵", "🍀", "🌳", "🌿", "🌱", "🍃", "🌴"],
+        "magic": ["🪄", "🔮", "✨", "🧙‍♂️", "🧚‍♀️"]
+    ]
     
-    @State var cardCount: Int = 4
+    @State var theme: String = "animals"
     
     var body: some View {
         VStack {
+            Text("Memorize!").font(.largeTitle)
             ScrollView {
                 cards
             }
             Spacer()
-            cardCountAdjusters
+            themeSelectors
         }
         .padding()
     }
     
     var cards: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 90))]) {
-            ForEach(0..<cardCount, id: \.self) { index in
-                CardView(content: emojis[index], isFaceUp: true)
+            ForEach(0..<themeMap[theme]!.count, id: \.self) { index in
+                CardView(content: themeMap[theme]![index], isFaceUp: true)
                     .aspectRatio(2/3, contentMode: .fit)
             }
         }
         .foregroundColor(.green)
     }
     
-    var cardCountAdjusters: some View {
+    var themeSelectors: some View {
         HStack {
-            cardRemover
+            animalSelector
             Spacer()
-            cardAdder
+            plantSelector
+            Spacer()
+            magicSelector
         }
         .imageScale(.large)
         .font(.largeTitle)
     }
     
-    func cardCountAdjuster(by offset: Int, symbol: String) -> some View {
+    func themeSelector(text: String) -> some View {
         Button(action: {
-            cardCount += offset
+            theme = text
         }, label: {
-            Image(systemName: symbol)
+            Text(text.uppercased())
         })
-        .disabled(cardCount + offset < 1 || cardCount + offset > emojis.count)
     }
     
-    var cardRemover: some View {
-        cardCountAdjuster(by: -1, symbol: "rectangle.stack.badge.minus.fill")
+    var animalSelector: some View {
+        themeSelector(text: "animals")
     }
     
-    var cardAdder: some View {
-        cardCountAdjuster(by: 1, symbol: "rectangle.stack.badge.plus.fill")
+    var plantSelector: some View {
+        themeSelector(text: "plants")
+    }
+    
+    var magicSelector: some View {
+        themeSelector(text: "magic")
     }
 }
 
