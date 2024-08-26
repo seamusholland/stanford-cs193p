@@ -36,7 +36,7 @@ struct ContentView: View {
     
     var cards: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 90))]) {
-            let randomArray = randomizeAndPairifyTheme(themeArray: themeMap[theme]!)
+            let randomArray = pairifyAndRandomizeTheme(themeArray: themeMap[theme]!)
             ForEach(0..<randomArray.count, id: \.self) { index in
                 CardView(content: randomArray[index])
                     .aspectRatio(2/3, contentMode: .fit)
@@ -58,23 +58,9 @@ struct ContentView: View {
         .padding(.horizontal)
     }
     
-    
-    func randomizeAndPairifyTheme(themeArray: [String]) -> [String] {
-        var counts: [String: Int] = Dictionary(uniqueKeysWithValues: themeArray.map { ($0, 2)})
-        var result: [String] = []
-        while !counts.isEmpty {
-            let randomEmoji = themeArray[Int.random(in: 0..<themeArray.count)]
-            if let count = counts[randomEmoji] {
-                result.append(randomEmoji)
-                if count - 1 == 0 {
-                    counts[randomEmoji] = nil
-                } else {
-                    counts[randomEmoji] = 1
-                }
-            }
-        }
-        
-        return result
+    func pairifyAndRandomizeTheme(themeArray: [String]) -> [String] {
+        let pairifiedArray = themeArray.flatMap { [$0, $0] }
+        return pairifiedArray.shuffled()
     }
     
     func themeSelector(text: String) -> some View {
