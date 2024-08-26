@@ -9,9 +9,15 @@ import SwiftUI
 
 struct ContentView: View {
     let themeMap = [
-        "animals": ["🦔", "🐂", "🐖","🐃", "🦡", "🐘", "🦒", "🐅", "🦓", "🐒", "🐆", "🦍"],
-        "plants": ["🌲", "🌵", "🍀", "🌳", "🌿", "🌱", "🍃", "🌴"],
-        "magic": ["🪄", "🔮", "✨", "🧙‍♂️", "🧚‍♀️"]
+        "animals": ["🦔", "🐂", "🐖","🐃", "🦡", "🐘"],
+        "plants": ["🌲", "🌵", "🍀", "🌳", "🌿"],
+        "magic": ["🪄", "🔮", "✨", "🧙‍♂️"]
+    ]
+    
+    let themeIcons = [
+        "animals": Image(systemName: "pawprint"),
+        "plants" : Image(systemName: "leaf"),
+        "magic" : Image(systemName: "moon.stars")
     ]
     
     @State var theme: String = "animals"
@@ -30,44 +36,56 @@ struct ContentView: View {
     
     var cards: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 90))]) {
-            ForEach(0..<themeMap[theme]!.count, id: \.self) { index in
-                CardView(content: themeMap[theme]![index], isFaceUp: true)
+            let randomArray = randomizeAndPairifyTheme(themeArray: themeMap[theme]!)
+            ForEach(0..<randomArray.count, id: \.self) { index in
+                CardView(content: randomArray[index])
                     .aspectRatio(2/3, contentMode: .fit)
             }
         }
-        .foregroundColor(.green)
+        .foregroundColor(.blue)
     }
     
     var themeSelectors: some View {
         HStack {
-            animalSelector
+            themeSelector(text: "animals")
             Spacer()
-            plantSelector
+            themeSelector(text: "plants")
             Spacer()
-            magicSelector
+            themeSelector(text: "magic")
         }
         .imageScale(.large)
-        .font(.largeTitle)
+        .font(.body)
+        .padding(.horizontal)
+    }
+    
+    
+    func randomizeAndPairifyTheme(themeArray: [String]) -> [String] {
+        var counts: [String: Int] = Dictionary(uniqueKeysWithValues: themeArray.map { ($0, 2)})
+        var result: [String] = []
+        while !counts.isEmpty {
+            let randomEmoji = themeArray[Int.random(in: 0..<themeArray.count)]
+            if let count = counts[randomEmoji] {
+                result.append(randomEmoji)
+                if count - 1 == 0 {
+                    counts[randomEmoji] = nil
+                } else {
+                    counts[randomEmoji] = 1
+                }
+            }
+        }
+        
+        return result
     }
     
     func themeSelector(text: String) -> some View {
         Button(action: {
             theme = text
         }, label: {
-            Text(text.uppercased())
+            VStack(content: {
+                themeIcons[text]!
+                Text(text.capitalized)
+            })
         })
-    }
-    
-    var animalSelector: some View {
-        themeSelector(text: "animals")
-    }
-    
-    var plantSelector: some View {
-        themeSelector(text: "plants")
-    }
-    
-    var magicSelector: some View {
-        themeSelector(text: "magic")
     }
 }
 
