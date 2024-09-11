@@ -8,78 +8,55 @@
 import SwiftUI
 
 struct EmojiMemoryGameView: View {
-    @ObservedObject var ViewModel: EmojiMemoryGame
+    @ObservedObject var viewModel: EmojiMemoryGame
     
     let themeMap = [
         "animals": ["🦔", "🐂", "🐖","🐃", "🦡", "🐘"],
         "plants": ["🌲", "🌵", "🍀", "🌳", "🌿"],
         "magic": ["🪄", "🔮", "✨", "🧙‍♂️"]
     ]
-    
-    let themeIcons = [
-        "animals": Image(systemName: "pawprint"),
-        "plants" : Image(systemName: "leaf"),
-        "magic" : Image(systemName: "moon.stars")
-    ]
-    
-    @State var theme: String = "animals"
-    
     var body: some View {
         VStack {
             Text("Memorize!").font(.largeTitle)
             ScrollView {
                 cards
+                    .animation(.default, value: viewModel.cards)
+            }
+            Button("Shuffle") {
+                viewModel.shuffle()
             }
             Spacer()
-            themeSelectors
         }
         .padding()
     }
     
     var cards: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 90))]) {
-            let randomArray = pairifyAndRandomizeTheme(themeArray: themeMap[theme]!)
-            ForEach(0..<randomArray.count, id: \.self) { index in
-                CardView(content: randomArray[index])
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 86), spacing: 0)]) {
+            ForEach(viewModel.cards) { card in
+                CardView(card)
                     .aspectRatio(2/3, contentMode: .fit)
+                    .padding(4)
+                    .onTapGesture {
+                        viewModel.choose(card)
+                    }
             }
         }
         .foregroundColor(.blue)
     }
     
-    var themeSelectors: some View {
-        HStack {
-            themeSelector(text: "animals")
-            Spacer()
-            themeSelector(text: "plants")
-            Spacer()
-            themeSelector(text: "magic")
-        }
-        .imageScale(.large)
-        .font(.body)
-        .padding(.horizontal)
-    }
     
     func pairifyAndRandomizeTheme(themeArray: [String]) -> [String] {
         let pairifiedArray = themeArray.flatMap { [$0, $0] }
         return pairifiedArray.shuffled()
     }
-    
-    func themeSelector(text: String) -> some View {
-        Button(action: {
-            theme = text
-        }, label: {
-            VStack(content: {
-                themeIcons[text]!
-                Text(text.capitalized)
-            })
-        })
-    }
 }
 
 struct CardView: View {
-    let content: String
-    @State var isFaceUp = false
+    let card: MemoryGame<String>.Card
+    
+    init(_ card: MemoryGame<String>.Card) {
+        self.card = card
+    }
     
     var body: some View {
         ZStack {
@@ -89,17 +66,17 @@ struct CardView: View {
                     .fill(.white)
                 base
                     .strokeBorder(lineWidth: 2)
-                Text(content).font(.largeTitle)
+                Text(card.content).font(.system(size: 200))
+                    .minimumScaleFactor(0.01)
+                    .aspectRatio(1, contentMode: .fit)
             }
-            .opacity(isFaceUp ? 1 : 0)
-            base.fill().opacity(isFaceUp ? 0 : 1)
-        }.onTapGesture {
-            isFaceUp.toggle()
+            .opacity(card.isFaceUp ? 1 : 0)
+            base.fill().opacity(card.isFaceUp ? 0 : 1)
         }
     }
 }
 
 
 #Preview {
-    EmojiMemoryGameView()
+    EmojiMemoryGameView(viewModel: EmojiMemoryGame())
 }
