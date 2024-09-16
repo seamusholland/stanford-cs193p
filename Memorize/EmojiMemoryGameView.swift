@@ -10,14 +10,14 @@ import SwiftUI
 struct EmojiMemoryGameView: View {
     @ObservedObject var viewModel: EmojiMemoryGame
     
-    let themeMap = [
-        "animals": ["🦔", "🐂", "🐖","🐃", "🦡", "🐘"],
-        "plants": ["🌲", "🌵", "🍀", "🌳", "🌿"],
-        "magic": ["🪄", "🔮", "✨", "🧙‍♂️"]
-    ]
     var body: some View {
-        VStack {
-            Text("Memorize!").font(.largeTitle)
+        VStack(alignment: .leading) {
+            HStack(spacing: 20) {
+                Button("New Game") {
+                    viewModel.newGame()
+                }
+                Text("Memorize!").font(.largeTitle)
+            }
             ScrollView {
                 cards
                     .animation(.default, value: viewModel.cards)
@@ -41,7 +41,7 @@ struct EmojiMemoryGameView: View {
                     }
             }
         }
-        .foregroundColor(.blue)
+        .foregroundColor(viewModel.getColor())
     }
     
     
